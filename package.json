@@ -1,0 +1,55 @@
+{
+  "name": "ent-electron-app",
+  "version": "1.0.0",
+  "description": "ENT Recording System - Electron App",
+  "type": "module",
+  "main": "main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && electron . --dev\"",
+    "dev:vite": "vite",
+    "dev:electron": "electron . --dev",
+    "build": "vite build && electron-builder",
+    "build:vite": "vite build",
+    "pack": "vite build && electron-builder --dir"
+  },
+  "dependencies": {
+    "chart.js": "^4.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "concurrently": "^8.2.2",
+    "electron": "^25.0.0",
+    "electron-builder": "^24.0.0",
+    "vite": "^5.0.0",
+    "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.ent.recording.system",
+    "productName": "ENT Recording System",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "dist-renderer",
+      "src/main/database.js",
+      "assets"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  },
+  "author": "ENT Dev Team"
+}
