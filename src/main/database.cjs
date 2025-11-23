@@ -33,8 +33,8 @@ class Database {
             fs.writeFileSync(this.dbFile, JSON.stringify(data, null, 2));
             return true;
         } catch (error) {
-            return false;
-        }
+                return false;
+            }
     }
 
     getPatients() { return this.readData().patients; }
@@ -135,7 +135,7 @@ class Database {
             throat: filteredVisits.filter(v => v.diagnosisType === 'throat').length
         };
 
-        const dailyVisits = this.getWeeklyVisits(filteredVisits);
+        const dailyVisits = this.getWeeklyVisits(filteredVisits, startDate, endDate);
 
         return {
             entCounts,
@@ -146,16 +146,25 @@ class Database {
         };
     }
 
-    getWeeklyVisits(visits) {
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    getWeeklyVisits(visits, startDate = null, endDate = null) {
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const weekVisits = Array(7).fill(0);
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        
+        let rangeStart = startDate;
+        let rangeEnd = endDate;
+        
+        if (!rangeStart || !rangeEnd) {
+            rangeEnd = new Date();
+            rangeStart = new Date();
+            rangeStart.setDate(rangeStart.getDate() - 7);
+        }
 
         visits.forEach(visit => {
             const visitDate = new Date(visit.date);
-            if (visitDate >= oneWeekAgo) {
-                weekVisits[visitDate.getDay()]++;
+            if (visitDate >= rangeStart && visitDate <= rangeEnd) {
+                const dayIndex = visitDate.getDay();
+                const adjustedIndex = dayIndex === 0 ? 6 : dayIndex - 1;
+                weekVisits[adjustedIndex]++;
             }
         });
 

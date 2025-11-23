@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Chart as ChartJS, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, DoughnutController, BarController } from 'chart.js'
 
 ChartJS.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, DoughnutController, BarController)
+if (typeof window !== 'undefined') window.Chart = ChartJS
 
 export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState(null)
@@ -17,6 +18,10 @@ export default function AnalyticsPage() {
   useEffect(() => {
     loadAnalytics()
   }, [currentFilter])
+
+  useEffect(() => {
+    applyPresetFilter('all')
+  }, [])
 
   const loadAnalytics = async () => {
     try {
@@ -93,16 +98,21 @@ export default function AnalyticsPage() {
       if (dailyChartInstanceRef.current) dailyChartInstanceRef.current.destroy()
       const ctx = dailyChartRef.current?.getContext('2d')
       if (!ctx) return
+      
+      const visits = analytics.dailyVisits.map(d => d.visits)
+      const maxVisits = Math.max(...visits, 1)
+      const yMax = maxVisits <= 10 ? 10 : Math.ceil(maxVisits / 5) * 5
+      
       dailyChartInstanceRef.current = new window.Chart(ctx, {
         type: 'bar',
         data: {
           labels: analytics.dailyVisits.map(d => d.day),
-          datasets: [{ label: 'Daily Visits', data: analytics.dailyVisits.map(d => d.visits), backgroundColor: '#3498db' }]
+          datasets: [{ label: 'Daily Visits', data: visits, backgroundColor: '#3498db' }]
         },
         options: { 
           responsive: true, 
           maintainAspectRatio: false,
-          scales: { y: { beginAtZero: true } },
+          scales: { y: { beginAtZero: true, max: yMax, ticks: { stepSize: yMax <= 10 ? 1 : 5 } } },
           plugins: {
             legend: {
               position: 'top',

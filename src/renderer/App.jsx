@@ -21,7 +21,7 @@ export default function App() {
       <div className="main-content">
         {currentPage === 'patients' && <PatientsPage onViewPatient={(id) => { setCurrentPatientId(id); setCurrentPage('profile'); }} onShowModal={() => { setEditingPatient(null); setShowPatientModal(true); }} onEditPatient={(p) => { setEditingPatient(p); setShowPatientModal(true); }} onRefresh={() => setRefreshPatients(r => r + 1)} refresh={refreshPatients} />}
         {currentPage === 'analytics' && <AnalyticsPage />}
-        {currentPage === 'profile' && <PatientProfilePage patientId={currentPatientId} onBack={() => setCurrentPage('patients')} onShowTimelineModal={() => setShowTimelineModal(true)} />}
+        {currentPage === 'profile' && <PatientProfilePage patientId={currentPatientId} onBack={() => setCurrentPage('patients')} onShowTimelineModal={() => setShowTimelineModal(true)} onEditPatient={(p) => { setEditingPatient(p); setShowPatientModal(true); }} />}
       </div>
       {showPatientModal && <PatientModal onClose={() => { setShowPatientModal(false); setEditingPatient(null); }} onSaved={() => { setShowPatientModal(false); setEditingPatient(null); setRefreshPatients(r => r + 1); }} patient={editingPatient} />}
       {showTimelineModal && <TimelineModal patientId={currentPatientId} onClose={() => setShowTimelineModal(false)} onSaved={() => setRefreshPatients(r => r + 1)} />}
