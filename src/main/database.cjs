@@ -33,8 +33,8 @@ class Database {
             fs.writeFileSync(this.dbFile, JSON.stringify(data, null, 2));
             return true;
         } catch (error) {
-                return false;
-            }
+            return false;
+        }
     }
 
     getPatients() { return this.readData().patients; }
@@ -129,30 +129,51 @@ class Database {
             });
         }
 
+        // ADD THESE DEBUG LOGS:
+        console.log('=== DATABASE DEBUG ===');
+        console.log('Date range:', {
+            start: startDate?.toISOString(),
+            end: endDate?.toISOString()
+        });
+        console.log('Total visits found:', filteredVisits.length);
+
+        // Log each visit's details
+        filteredVisits.forEach(visit => {
+            console.log('Visit:', {
+                date: visit.date,
+                diagnosisType: visit.diagnosisType,
+                diagnosis: visit.diagnosis,
+                chiefComplaint: visit.chiefComplaint
+            });
+        });
+
         const entCounts = {
             ear: filteredVisits.filter(v => v.diagnosisType === 'ear').length,
             nose: filteredVisits.filter(v => v.diagnosisType === 'nose').length,
             throat: filteredVisits.filter(v => v.diagnosisType === 'throat').length
         };
 
-        const dailyVisits = this.getWeeklyVisits(filteredVisits, startDate, endDate);
+        console.log('Final ENT counts:', entCounts);
+        console.log('=====================');
+
+        const dailyVisits = this.getWeeklyVisits(filteredVisits);
 
         return {
             entCounts,
             dailyVisits,
             totalPatients: data.patients.length,
             totalVisits: filteredVisits.length,
-            visits: filteredVisits // Include visits for filtering
+            visits: filteredVisits
         };
     }
 
     getWeeklyVisits(visits, startDate = null, endDate = null) {
         const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         const weekVisits = Array(7).fill(0);
-        
+
         let rangeStart = startDate;
         let rangeEnd = endDate;
-        
+
         if (!rangeStart || !rangeEnd) {
             rangeEnd = new Date();
             rangeStart = new Date();
