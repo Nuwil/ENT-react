@@ -1,8 +1,10 @@
+import entLogo from '../assets/images/ENT-logo.png' 
 export default function Sidebar({ currentPage, onPageChange }) {
+
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <img src="/src/renderer/assets/images/ENT-logo.png" alt="ENT Logo" className="logo" />
+        <img src={entLogo} alt="ENT Logo" className="logo" />
       </div>
       <nav className="sidebar-nav">
         <button className={`nav-btn ${currentPage === 'patients' ? 'active' : ''}`} onClick={() => onPageChange('patients')}>
@@ -17,3 +19,4 @@ export default function Sidebar({ currentPage, onPageChange }) {
     </div>
   )
 }
+

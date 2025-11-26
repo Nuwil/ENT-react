@@ -19,7 +19,7 @@ export default function PatientProfilePage({ patientId, onBack, onShowTimelineMo
   if (!patient) return <div>Loading...</div>
 
   return (
-    <div className="page-content">
+    <div className="page-content" style={{paddingRight: '10rem'}}>
       <div className="profile-header-bar">
         <button onClick={onBack} className="btn btn-secondary">← Back</button>
         <h2>{patient.name}</h2>

@@ -41,7 +41,7 @@ export default function PatientsPage({ onViewPatient, onShowModal, onEditPatient
   }
 
   return (
-    <div className="page-content">
+    <div className="page-content" style={{ paddingRight: '10rem'}}>
       <h2>Patient List</h2>
       <p>Manage patients and view their timeline</p>
       <div className="search-container">

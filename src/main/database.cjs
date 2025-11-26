@@ -89,22 +89,58 @@ class Database {
         const patient = data.patients.find(p => p.id === patientId);
         if (!patient) return null;
 
+        const normalizeDiagnosisType = (type) => {
+            if (!type || typeof type !== 'string') return '';
+            const normalized = type.toLowerCase();
+            return ['ear', 'nose', 'throat'].includes(normalized) ? normalized : '';
+        };
+
+        const sanitizedVisitData = {
+            ...visitData,
+            diagnosisType: normalizeDiagnosisType(visitData.diagnosisType)
+        };
+
         const newVisit = {
             id: uuidv4(),
             patientId,
-            ...visitData,
+            ...sanitizedVisitData,
             date: new Date().toISOString()
         };
         data.visits.push(newVisit);
         return this.writeData(data) ? newVisit : null;
     }
 
+    normalizeVisitType(type) {
+        if (!type || typeof type !== 'string') return '';
+        const normalized = type.toLowerCase();
+        return ['ear', 'nose', 'throat'].includes(normalized) ? normalized : '';
+    }
+
+    ensureVisitNormalization(data) {
+        if (!data?.visits?.length) return data;
+        let updated = false;
+
+        data.visits = data.visits.map((visit) => {
+            const normalizedType = this.normalizeVisitType(visit.diagnosisType);
+            if (normalizedType !== visit.diagnosisType) {
+                updated = true;
+                return { ...visit, diagnosisType: normalizedType };
+            }
+            return visit;
+        });
+
+        if (updated) {
+            this.writeData(data);
+        }
+        return data;
+    }
+
     getAnalytics() {
-        const data = this.readData();
+        const data = this.ensureVisitNormalization(this.readData());
         const entCounts = {
-            ear: data.visits.filter(v => v.diagnosisType === 'ear').length,
-            nose: data.visits.filter(v => v.diagnosisType === 'nose').length,
-            throat: data.visits.filter(v => v.diagnosisType === 'throat').length
+            ear: data.visits.filter(v => this.normalizeVisitType(v.diagnosisType) === 'ear').length,
+            nose: data.visits.filter(v => this.normalizeVisitType(v.diagnosisType) === 'nose').length,
+            throat: data.visits.filter(v => this.normalizeVisitType(v.diagnosisType) === 'throat').length
         };
 
         const dailyVisits = this.getWeeklyVisits(data.visits);
@@ -113,12 +149,13 @@ class Database {
             entCounts,
             dailyVisits,
             totalPatients: data.patients.length,
-            totalVisits: data.visits.length
+            totalVisits: data.visits.length,
+            visits: data.visits
         };
     }
 
     getAnalyticsWithFilter(startDate, endDate) {
-        const data = this.readData();
+        const data = this.ensureVisitNormalization(this.readData());
 
         // Filter visits by date range
         let filteredVisits = data.visits;
@@ -148,15 +185,15 @@ class Database {
         });
 
         const entCounts = {
-            ear: filteredVisits.filter(v => v.diagnosisType === 'ear').length,
-            nose: filteredVisits.filter(v => v.diagnosisType === 'nose').length,
-            throat: filteredVisits.filter(v => v.diagnosisType === 'throat').length
+            ear: filteredVisits.filter(v => this.normalizeVisitType(v.diagnosisType) === 'ear').length,
+            nose: filteredVisits.filter(v => this.normalizeVisitType(v.diagnosisType) === 'nose').length,
+            throat: filteredVisits.filter(v => this.normalizeVisitType(v.diagnosisType) === 'throat').length
         };
 
         console.log('Final ENT counts:', entCounts);
         console.log('=====================');
 
-        const dailyVisits = this.getWeeklyVisits(filteredVisits);
+        const dailyVisits = this.getWeeklyVisits(filteredVisits, startDate, endDate);
 
         return {
             entCounts,
